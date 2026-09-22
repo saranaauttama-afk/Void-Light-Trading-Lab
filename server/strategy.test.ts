@@ -1,0 +1,3 @@
+import{describe,it,expect}from'vitest';import{analyze,backtest,type Candle}from'./strategy';
+const candles=(up:boolean):Candle[]=>Array.from({length:80},(_,i)=>{const p=100+(up?i:-i)*.5;return{openTime:i,open:p,high:p+1,low:p-1,close:p,volume:10}});
+describe('strategy research engine',()=>{it('classifies a rising EMA regime',()=>expect(analyze(candles(true)).signal).toBe('BULLISH'));it('classifies a falling EMA regime',()=>expect(analyze(candles(false)).signal).toBe('BEARISH'));it('backtest returns finite risk metrics',()=>{const r=backtest(candles(true));expect(Number.isFinite(r.finalEquity)).toBe(true);expect(r.maxDrawdownPct).toBeGreaterThanOrEqual(0);expect(r.trades).toBeGreaterThanOrEqual(0)})});
