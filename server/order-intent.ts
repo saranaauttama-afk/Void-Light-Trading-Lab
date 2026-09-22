@@ -1,0 +1,1 @@
+import type{OrderIntent,Side}from'../shared/types.js';export function createOrderIntent(symbol:string,side:Side,notional:number,reason:string):OrderIntent{return{id:crypto.randomUUID(),symbol:symbol.toUpperCase(),side,notional:Math.max(0,notional),reason,createdAt:new Date().toISOString()}}
