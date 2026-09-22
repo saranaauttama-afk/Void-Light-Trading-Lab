@@ -1,15 +1,17 @@
 # Void Light Trading Lab
 
-An experiment-first crypto trading research lab. **v0.1 is paper trading only. It cannot place live exchange orders.**
+Experiment-first crypto trading research lab. **v0.3 is paper trading only and cannot place live exchange orders.**
 
-## What works
-- BTC/USDT public market data from Binance
-- $100 local paper portfolio
-- Start/pause trading session
-- Manual paper buy/sell routed through a Risk Engine
-- Daily profit/loss stops, max trades and max position size
-- Live mark-to-market equity and trade log
-- Dark responsive dashboard
+## Current
+- Binance BTC/USDT public ticker + historical candles
+- $100 paper portfolio and forward-test journal
+- Deterministic Risk Engine: daily stops, trade count and position limits
+- Multi-timeframe 15m / 1h / 4h scanner
+- EMA9/EMA21 + RSI14 + ATR14 + relative volume features
+- Backtest comparison across timeframes with 0.1% simulated fees
+- Equity curves, return, max drawdown and trade counts
+- Unit tests + GitHub CI
+- Responsive dark research dashboard
 
 ## Run
 ```bash
@@ -19,16 +21,8 @@ npm run dev
 ```
 Open http://localhost:5173. API runs at http://localhost:8787.
 
-## Safety architecture
-Secrets never belong in the browser or AI prompt. Strategy/AI never bypasses Risk Engine. v0.1 deliberately has no authenticated Binance endpoint and no live execution adapter.
+## Boundary
+No authenticated Binance endpoint exists. No live execution adapter exists. Secrets never belong in the browser or an AI prompt. Future AI analysis remains subordinate to deterministic risk controls.
 
 ## Next
-1. Candle history + indicator engine
-2. Deterministic strategy + signal journal
-3. Backtester with fees/slippage
-4. SQLite persistence and daily-session reset
-5. AI market-regime analysis with structured output
-6. Forward-test reports and strategy comparison
-7. Only after validation: design a separately gated live execution layer
-
-See `docs/ROADMAP.md`.
+Persistence/daily reset, richer experiment journal, out-of-sample/walk-forward validation, benchmark comparison, then optional server-side AI regime analysis with structured outputs.
