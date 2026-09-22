@@ -1,0 +1,5 @@
+export type Side='BUY'|'SELL';
+export type MarketSnapshot={symbol:string;price:number;changePct:number;high:number;low:number;volume:number;updatedAt:string};
+export type RiskConfig={startingBalance:number;dailyProfitTargetPct:number;dailyLossLimitPct:number;maxTradesPerDay:number;maxPositionPct:number;cooldownMinutes:number};
+export type Trade={id:string;side:Side;price:number;quantity:number;notional:number;createdAt:string;reason:string};
+export type LabState={mode:'PAPER';status:'RUNNING'|'PAUSED'|'DAILY_LIMIT';cash:number;asset:number;equity:number;dailyPnl:number;dailyPnlPct:number;trades:Trade[];risk:RiskConfig};
