@@ -1,0 +1,3 @@
+import{describe,it,expect}from'vitest';import{riskCheck}from'./risk';import type{LabState}from'../shared/types';
+const base:LabState={mode:'PAPER',status:'RUNNING',cash:100,asset:0,equity:100,dailyPnl:0,dailyPnlPct:0,trades:[],risk:{startingBalance:100,dailyProfitTargetPct:2,dailyLossLimitPct:2,maxTradesPerDay:6,maxPositionPct:25,cooldownMinutes:15}};
+describe('riskCheck',()=>{it('allows bounded paper order',()=>expect(riskCheck(base,'BUY',10).ok).toBe(true));it('blocks oversized position',()=>expect(riskCheck(base,'BUY',30).ok).toBe(false));it('blocks stopped session',()=>expect(riskCheck({...base,status:'PAUSED'},'BUY',10).ok).toBe(false));});
