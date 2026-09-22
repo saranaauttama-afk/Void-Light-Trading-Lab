@@ -240,7 +240,7 @@ Recommended next implementation:
 
 An AI continuing this project should know these before adding features:
 
-1. **Run the full tests and build first.** Do not claim green CI/build without actually executing them.
+1. **Run the full tests and build first.** A local dependency-install verification attempt on 2026-09-22 timed out before dependencies completed installing, so the repository is still **not verified green**. Do not claim tests/build/CI pass until they actually run successfully.
 2. Strategy RSI and ATR are simple baseline implementations; they are not Wilder-smoothed versions.
 3. Backtest repeatedly analyzes growing candle slices and is O(n²). Fine for <=1000 candles, but refactor before large datasets.
 4. Backtest does not yet expose closed-trade P&L, win rate, profit factor, total fees, slippage, expectancy, Sharpe/Sortino, or exposure time.
@@ -332,7 +332,7 @@ When continuing from this repository:
 ## 13. Definition of done for the next milestone
 
 A good v0.7 milestone is:
-- tests/build verified locally
+- tests/build verified locally (currently pending; last install attempt timed out)
 - restart-safe paper persistence
 - correct daily baseline/reset
 - cooldown enforcement
