@@ -45,34 +45,20 @@ jobs:
         working-directory: mobile
         run: npx expo prebuild --platform android --no-install
 
-      # A standard `debug` build variant does NOT embed the JS bundle — it
-      # expects a Metro dev server on the same network (npx expo start).
-      # A standalone sideloaded APK has no such server, so it shows a blank
-      # white screen. `debuggableVariants = []` makes the debug variant
-      # bundle its own JS, like a release build would, while keeping the
-      # auto debug keystore — no extra signing setup needed.
-      - name: Force JS bundling into the debug APK
-        run: |
-          FILE=mobile/android/app/build.gradle
-          if ! grep -qE '^react[[:space:]]*\{' "$FILE"; then
-            echo "::error::Could not find 'react {' block in $FILE — Expo's gradle template may have changed."
-            exit 1
-          fi
-          sed -i -E '/^react[[:space:]]*\{/a\    debuggableVariants = []' "$FILE"
-          grep -A2 -E '^react[[:space:]]*\{' "$FILE"
-
-      # Debug build: auto-signed with Android's built-in debug keystore, so
-      # it installs straight on a phone with no signing setup required.
-      # Fine for personal/sideloaded use; a Play Store release would need a
-      # real keystore + assembleRelease instead.
-      - name: Build debug APK
+      # Release variant: always embeds the JS bundle and has no dev-server
+      # support code, so it runs standalone. Expo's generated build.gradle
+      # signs release with the debug keystore by default — fine for
+      # personal sideloading, no keystore setup needed. (A debug variant,
+      # even with the bundle embedded, still waits on a Metro dev server
+      # and shows a blank white screen.) arm64-only keeps the APK small.
+      - name: Build release APK (debug-keystore signed)
         working-directory: mobile/android
-        run: ./gradlew assembleDebug --no-daemon
+        run: ./gradlew assembleRelease --no-daemon -PreactNativeArchitectures=arm64-v8a
 
       - name: Stage APK
         run: |
           mkdir -p release-out
-          cp mobile/android/app/build/outputs/apk/debug/app-debug.apk \
+          cp mobile/android/app/build/outputs/apk/release/app-release.apk \
              release-out/void-light-mobile-${{ github.run_number }}.apk
 
       # Publishing as a Release asset (rather than a workflow artifact) is
@@ -83,8 +69,8 @@ jobs:
           tag_name: mobile-build-${{ github.run_number }}
           name: 'Void Light Mobile — build #${{ github.run_number }}'
           body: |
-            Auto-built debug APK from commit ${{ github.sha }}.
-            Debug-signed only — for personal sideloading, not Play Store distribution.
+            Auto-built release APK (debug-keystore signed) from commit ${{ github.sha }}.
+            Signed with the debug keystore — for personal sideloading, not Play Store distribution.
           files: release-out/*.apk
           prerelease: true
         env:

@@ -9,10 +9,24 @@ import 'react-native-reanimated';
 import { useColorScheme } from '@/components/useColorScheme';
 import { ApiConfigProvider } from '@/lib/apiConfig';
 
-export {
-  // Catch any errors thrown by the Layout component.
-  ErrorBoundary,
-} from 'expo-router';
+import { ScrollView, Text as RNText } from 'react-native';
+import type { ErrorBoundaryProps } from 'expo-router';
+
+// Shows the actual error on screen instead of a silent blank page, so a
+// crash can be diagnosed from a screenshot without adb/logcat.
+export function ErrorBoundary({ error, retry }: ErrorBoundaryProps) {
+  useEffect(() => {
+    SplashScreen.hideAsync().catch(() => {});
+  }, []);
+  return (
+    <ScrollView style={{ flex: 1, backgroundColor: '#fff' }} contentContainerStyle={{ padding: 24, paddingTop: 64 }}>
+      <RNText style={{ color: '#dc2626', fontSize: 18, fontWeight: '700', marginBottom: 12 }}>App error</RNText>
+      <RNText selectable style={{ color: '#111', marginBottom: 12 }}>{error.message}</RNText>
+      <RNText selectable style={{ color: '#555', fontSize: 11 }}>{error.stack}</RNText>
+      <RNText onPress={retry} style={{ color: '#2563eb', marginTop: 20, fontWeight: '700' }}>Retry</RNText>
+    </ScrollView>
+  );
+}
 
 export const unstable_settings = {
   // Ensure that reloading on `/modal` keeps a back button present.
@@ -30,16 +44,12 @@ export default function RootLayout() {
 
   // Expo Router uses Error Boundaries to catch errors in the navigation tree.
   useEffect(() => {
-    if (error) throw error;
-  }, [error]);
-
-  useEffect(() => {
-    if (loaded) {
-      SplashScreen.hideAsync();
+    if (loaded || error) {
+      SplashScreen.hideAsync().catch(() => {});
     }
-  }, [loaded]);
+  }, [loaded, error]);
 
-  if (!loaded) {
+  if (!loaded && !error) {
     return null;
   }
 
