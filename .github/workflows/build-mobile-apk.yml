@@ -35,7 +35,9 @@ jobs:
           distribution: temurin
           java-version: '17'
 
-      - uses: android-actions/setup-android@v3
+      # ubuntu-latest GitHub runners ship the Android SDK/build-tools
+      # pre-installed with licenses already accepted — android-actions/
+      # setup-android was flaky and is unnecessary here.
 
       # Turns the Expo-managed project into a real android/ Gradle project.
       # --no-install: we already installed JS deps above.
