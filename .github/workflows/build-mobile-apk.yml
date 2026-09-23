@@ -45,6 +45,22 @@ jobs:
         working-directory: mobile
         run: npx expo prebuild --platform android --no-install
 
+      # A standard `debug` build variant does NOT embed the JS bundle — it
+      # expects a Metro dev server on the same network (npx expo start).
+      # A standalone sideloaded APK has no such server, so it shows a blank
+      # white screen. `debuggableVariants = []` makes the debug variant
+      # bundle its own JS, like a release build would, while keeping the
+      # auto debug keystore — no extra signing setup needed.
+      - name: Force JS bundling into the debug APK
+        run: |
+          FILE=mobile/android/app/build.gradle
+          if ! grep -qE '^react[[:space:]]*\{' "$FILE"; then
+            echo "::error::Could not find 'react {' block in $FILE — Expo's gradle template may have changed."
+            exit 1
+          fi
+          sed -i -E '/^react[[:space:]]*\{/a\    debuggableVariants = []' "$FILE"
+          grep -A2 -E '^react[[:space:]]*\{' "$FILE"
+
       # Debug build: auto-signed with Android's built-in debug keystore, so
       # it installs straight on a phone with no signing setup required.
       # Fine for personal/sideloaded use; a Play Store release would need a
