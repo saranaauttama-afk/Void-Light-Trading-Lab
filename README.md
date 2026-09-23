@@ -346,3 +346,14 @@ Do not start by adding more indicators. Reliability and experiment integrity are
 ---
 
 Void Light is currently a **research system with a complete paper execution path and an explicit live adapter seam**. Treat the current deterministic risk and execution boundaries as core architecture, not temporary scaffolding.
+
+## 14. Mobile client
+
+`mobile/` is an Expo/React Native client (5 tabs: Market, Paper, Live,
+Research, Settings) that talks to this same server's API — no server
+changes needed, it's a thin client. See `mobile/README.md` for how to
+run it in Expo Go, and `.github/workflows/build-mobile-apk.yml` for how
+it gets built into a downloadable debug APK on GitHub's own runners
+(triggered on push to `mobile/**`, or manually via workflow_dispatch) —
+useful since building an Android APK needs the Android SDK/Gradle, which
+isn't always available locally.

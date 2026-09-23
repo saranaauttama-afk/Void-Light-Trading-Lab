@@ -1,0 +1,73 @@
+name: Build Mobile APK
+
+# Runs on GitHub's own runners, which have full internet access (Android
+# SDK, Gradle, Maven) unlike a locked-down sandbox. Triggers whenever
+# mobile/ changes, or manually from the Actions tab.
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'mobile/**'
+      - '.github/workflows/build-mobile-apk.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write # needed to publish the GitHub Release the APK is attached to
+
+jobs:
+  build-apk:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: mobile/package-lock.json
+
+      - name: Install JS dependencies
+        working-directory: mobile
+        run: npm ci
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: android-actions/setup-android@v3
+
+      # Turns the Expo-managed project into a real android/ Gradle project.
+      # --no-install: we already installed JS deps above.
+      - name: Expo prebuild (generate native Android project)
+        working-directory: mobile
+        run: npx expo prebuild --platform android --no-install
+
+      # Debug build: auto-signed with Android's built-in debug keystore, so
+      # it installs straight on a phone with no signing setup required.
+      # Fine for personal/sideloaded use; a Play Store release would need a
+      # real keystore + assembleRelease instead.
+      - name: Build debug APK
+        working-directory: mobile/android
+        run: ./gradlew assembleDebug --no-daemon
+
+      - name: Stage APK
+        run: |
+          mkdir -p release-out
+          cp mobile/android/app/build/outputs/apk/debug/app-debug.apk \
+             release-out/void-light-mobile-${{ github.run_number }}.apk
+
+      # Publishing as a Release asset (rather than a workflow artifact) is
+      # what makes it downloadable via a plain GitHub API request later.
+      - name: Publish APK as a GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: mobile-build-${{ github.run_number }}
+          name: 'Void Light Mobile — build #${{ github.run_number }}'
+          body: |
+            Auto-built debug APK from commit ${{ github.sha }}.
+            Debug-signed only — for personal sideloading, not Play Store distribution.
+          files: release-out/*.apk
+          prerelease: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
